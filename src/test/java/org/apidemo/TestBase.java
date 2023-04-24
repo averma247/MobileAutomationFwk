@@ -1,31 +1,49 @@
 package org.apidemo;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.Status;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+import com.aventstack.extentreports.reporter.configuration.Theme;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileBy;
 import io.appium.java_client.MobileElement;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
+import org.apache.commons.codec.binary.Base64;
 import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.Assert;
+import org.testng.ITestContext;
+import org.testng.ITestListener;
+import org.testng.ITestResult;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
+
 
 public class TestBase {
 
     public static AppiumDriver<MobileElement> driver;
     public static DesiredCapabilities caps;
     public static URL url;
+
+    static ExtentReports extent;
+    static ExtentSparkReporter spark;
+
+    static ExtentTest test;
 
     static Properties prop;
 
@@ -35,6 +53,14 @@ public class TestBase {
             prop = new Properties();
             FileInputStream ip = new FileInputStream(System.getProperty("user.dir") + "/src/test/resources/config.properties");
             prop.load(ip);
+
+            extent = new ExtentReports();
+            spark= new ExtentSparkReporter("Results/ExtentReport.html");
+            spark.config().setTheme(Theme.STANDARD);
+            spark.config().setDocumentTitle("Mobile Automation Report Demo");
+            spark.config().setReportName("Mobile Automation Demo");
+            extent.attachReporter(spark);
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -107,9 +133,28 @@ public class TestBase {
     }
 
 
+    @AfterMethod
+    public void after_Method(ITestResult result) throws IOException {
+
+        if(result.getStatus()==ITestResult.FAILURE){
+            test.log(Status.FAIL,result.getMethod().toString()+" is Failed.");
+            //test.addScreenCaptureFromBase64String(getScreenShotFilePath());
+            test.addScreenCaptureFromPath(getScreenShotFilePath());
+        }
+
+        if(result.getStatus()==ITestResult.SUCCESS){
+            test.log(Status.PASS,result.getMethod().toString());
+
+        }
+
+
+    }
+
     @AfterTest
-    public void tearDown() {
+    public void tearDown(){
+
         driver.quit();
+        extent.flush();
 
     }
 
@@ -117,4 +162,17 @@ public class TestBase {
         return driver;
     }
 
+    public String getScreenShotFilePath() throws IOException {
+
+        String dateName = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date());
+
+
+        String base64ScreenShot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.BASE64);
+        String destinationScreenShotFilePath= System.getProperty("user.dir")+"/Screenshots/Screenshots_"+dateName+".png";
+        File destinationScreenShotFile = new File(destinationScreenShotFilePath);
+        FileOutputStream fos= new FileOutputStream(destinationScreenShotFile);
+        fos.write(Base64.decodeBase64(base64ScreenShot));
+
+        return destinationScreenShotFilePath;
+    }
 }
