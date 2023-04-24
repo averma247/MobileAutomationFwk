@@ -5,6 +5,7 @@ import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import com.aventstack.extentreports.reporter.configuration.Theme;
+import com.aventstack.extentreports.reporter.configuration.ViewName;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileBy;
 import io.appium.java_client.MobileElement;
@@ -26,6 +27,7 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.awt.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,6 +41,7 @@ public class TestBase {
     public static AppiumDriver<MobileElement> driver;
     public static DesiredCapabilities caps;
     public static URL url;
+    File extentReportFile;
 
     static ExtentReports extent;
     static ExtentSparkReporter spark;
@@ -55,11 +58,16 @@ public class TestBase {
             prop.load(ip);
 
             extent = new ExtentReports();
-            spark= new ExtentSparkReporter("Results/ExtentReport.html");
+            extentReportFile = new File(System.getProperty("user.dir") + "/Results/ExtentReport.html");
+            spark = new ExtentSparkReporter(extentReportFile);
             spark.config().setTheme(Theme.STANDARD);
             spark.config().setDocumentTitle("Mobile Automation Report Demo");
             spark.config().setReportName("Mobile Automation Demo");
             extent.attachReporter(spark);
+            extent.setSystemInfo("OS", System.getProperty("os.name"));
+            extent.setSystemInfo("OS Version", System.getProperty("os.version"));
+            extent.setSystemInfo("OS Architecture", System.getProperty("os.arch"));
+            extent.setSystemInfo("User Name", System.getProperty("user.name"));
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -78,10 +86,12 @@ public class TestBase {
             switch (exePlatformName) {
                 case "Android":
                     initAndroidDriver();
+                    extent.setSystemInfo("Mobile OS", exePlatformName);
                     break;
 
                 case "iOS":
                     initIOSDriver();
+                    extent.setSystemInfo("Mobile OS", exePlatformName);
                     break;
                 default:
                     System.out.println("Please provide correct platform like Android/iOS");
@@ -117,13 +127,13 @@ public class TestBase {
 
     public static void initIOSDriver() throws MalformedURLException {
         caps.setCapability(MobileCapabilityType.PLATFORM_NAME, prop.getProperty("IOSPLATFORM_NAME"));
-        caps.setCapability(MobileCapabilityType.PLATFORM_VERSION,prop.getProperty("IOSPLATFORM_VERSION"));
+        caps.setCapability(MobileCapabilityType.PLATFORM_VERSION, prop.getProperty("IOSPLATFORM_VERSION"));
         caps.setCapability(MobileCapabilityType.DEVICE_NAME, prop.getProperty("IOSDEVICE_NAME"));
         caps.setCapability(MobileCapabilityType.AUTOMATION_NAME, prop.getProperty("IOSAUTOMATION_NAME"));
         caps.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT, 60);
         caps.setCapability("fullReset", "false");
         caps.setCapability("autoGrantPermissions", "true");
-        caps.setCapability(MobileCapabilityType.APP, System.getProperty("user.dir")+prop.getProperty("IOSAPP_PATH"));
+        caps.setCapability(MobileCapabilityType.APP, System.getProperty("user.dir") + prop.getProperty("IOSAPP_PATH"));
 
 
         url = new URL("http://127.0.0.1:4723");
@@ -136,14 +146,14 @@ public class TestBase {
     @AfterMethod
     public void after_Method(ITestResult result) throws IOException {
 
-        if(result.getStatus()==ITestResult.FAILURE){
-            test.log(Status.FAIL,result.getMethod().toString()+" is Failed.");
+        if (result.getStatus() == ITestResult.FAILURE) {
+            test.log(Status.FAIL, result.getMethod().toString() + " is Failed.");
             //test.addScreenCaptureFromBase64String(getScreenShotFilePath());
             test.addScreenCaptureFromPath(getScreenShotFilePath());
         }
 
-        if(result.getStatus()==ITestResult.SUCCESS){
-            test.log(Status.PASS,result.getMethod().toString());
+        if (result.getStatus() == ITestResult.SUCCESS) {
+            test.log(Status.PASS, result.getMethod().toString());
 
         }
 
@@ -151,10 +161,11 @@ public class TestBase {
     }
 
     @AfterTest
-    public void tearDown(){
+    public void tearDown() throws IOException {
 
         driver.quit();
         extent.flush();
+        //Desktop.getDesktop().browse(extentReportFile.toURI());
 
     }
 
@@ -167,10 +178,10 @@ public class TestBase {
         String dateName = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date());
 
 
-        String base64ScreenShot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.BASE64);
-        String destinationScreenShotFilePath= System.getProperty("user.dir")+"/Screenshots/Screenshots_"+dateName+".png";
+        String base64ScreenShot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BASE64);
+        String destinationScreenShotFilePath = System.getProperty("user.dir") + "/Screenshots/Screenshots_" + dateName + ".png";
         File destinationScreenShotFile = new File(destinationScreenShotFilePath);
-        FileOutputStream fos= new FileOutputStream(destinationScreenShotFile);
+        FileOutputStream fos = new FileOutputStream(destinationScreenShotFile);
         fos.write(Base64.decodeBase64(base64ScreenShot));
 
         return destinationScreenShotFilePath;
