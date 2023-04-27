@@ -57,6 +57,7 @@ public class TestBase {
             FileInputStream ip = new FileInputStream(System.getProperty("user.dir") + "/src/test/resources/config.properties");
             prop.load(ip);
 
+            //------------------ Extent Report Settings -------------//
             extent = new ExtentReports();
             extentReportFile = new File(System.getProperty("user.dir") + "/Results/ExtentReport.html");
             spark = new ExtentSparkReporter(extentReportFile);
@@ -68,6 +69,7 @@ public class TestBase {
             extent.setSystemInfo("OS Version", System.getProperty("os.version"));
             extent.setSystemInfo("OS Architecture", System.getProperty("os.arch"));
             extent.setSystemInfo("User Name", System.getProperty("user.name"));
+            extent.setSystemInfo("Environment",prop.getProperty("ENVIRONMENT"));
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -147,13 +149,14 @@ public class TestBase {
     public void after_Method(ITestResult result) throws IOException {
 
         if (result.getStatus() == ITestResult.FAILURE) {
-            test.log(Status.FAIL, result.getMethod().toString() + " is Failed.");
+            test.log(Status.FAIL, result.getThrowable());
+            test.log(Status.FAIL, "Test case is Failed.");
             //test.addScreenCaptureFromBase64String(getScreenShotFilePath());
             test.addScreenCaptureFromPath(getScreenShotFilePath());
         }
 
         if (result.getStatus() == ITestResult.SUCCESS) {
-            test.log(Status.PASS, result.getMethod().toString());
+            test.log(Status.PASS, "Test Case Is Passed");
 
         }
 

@@ -24,19 +24,26 @@ public class UIKitCatalogTest extends TestBase {
     }
 
 
-    @Test
-    public void verifyHomePageTest() {
+    @Test(priority = 0)
+    public void verifyHomePageElementTest() {
 
-        test = extent.createTest("Verify Home Page");
+        test = extent.createTest("Verify Home Page").assignAuthor(prop.getProperty("AUTHOR")).assignCategory(prop.getProperty("TESTSUITE")).assignDevice(prop.getProperty("EXECUTIONPLATFORM"));
         test.log(Status.INFO, "Verify Home Page ");
         homePage.checkingNumberOfElements();
+
+
+    }
+
+    @Test(priority = 1)
+    public void verifyAlertViews() {
+
+        test = extent.createTest("Verify Alert Views Page").assignAuthor(prop.getProperty("AUTHOR")).assignCategory(prop.getProperty("TESTSUITE")).assignDevice(prop.getProperty("EXECUTIONPLATFORM"));
         test.log(Status.INFO, "Clicking on Home Element - Alert Views ");
         homePage.clickOnHomeElements("Alert Views");
         test.log(Status.INFO, "Handle Simple Alert");
         test.log(Status.INFO, "Handle Ok Cancel/Alert ");
         alertViewPage.handleSimpleAlert();
         alertViewPage.handleOkCancelAlert();
-
 
     }
 
