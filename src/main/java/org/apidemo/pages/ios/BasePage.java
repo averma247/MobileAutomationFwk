@@ -21,4 +21,8 @@ public class BasePage {
         wait.until(ExpectedConditions.elementToBeClickable(driver.findElementByName(idname)));
         driver.findElementByName(idname).click();
     }
+
+    public boolean verifyElementIsPresentUsingName(String idname){
+        return  driver.findElementByName(idname).isDisplayed();
+    }
 }

@@ -22,5 +22,20 @@ public class AlertViewPage extends BasePage {
 
     }
 
+    public boolean handleActionSheets(){
+       if (verifyElementIsPresentUsingName("ACTION SHEET STYLE")){
+           clickElementsUsingName("Confirm / Cancel");
+           if(verifyElementIsPresentUsingName("Confirm")){
+               clickElementsUsingName("Confirm");
+               return true;
+           }
+           else
+               return false;
+       }
+       else
+           return false;
+
+    }
+
 
 }
