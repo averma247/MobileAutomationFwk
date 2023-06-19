@@ -96,7 +96,7 @@ public class TestBase {
                     extent.setSystemInfo("Mobile OS", exePlatformName);
                     break;
                 default:
-                    System.out.println("Please provide correct platform like Android/iOS");
+                    System.out.println("Please provide correct platform like Android/iOS.");
             }
 
         } catch (Exception e) {

@@ -51,7 +51,7 @@ public class UIKitCatalogTest extends TestBase {
     public void verifyActionSheets(){
 
         test = extent.createTest("Verify Action Sheet Alert").assignAuthor(prop.getProperty("AUTHOR")).assignCategory(prop.getProperty("TESTSUITE")).assignDevice(prop.getProperty("EXECUTIONPLATFORM"));
-        test.log(Status.INFO, "Handle Action Sheet Alert");
+        test.log(Status.INFO, "Handle Action Sheet Alert.");
         Assert.assertEquals(true,alertViewPage.handleActionSheets());
 
     }
